@@ -1,0 +1,5 @@
+# Ocultar la carpeta templates de las estadísticas de lenguaje
+templates/* linguist-vendored
+
+# Forzar la detección de C (por si los archivos de MPLAB/CCS son muy ligeros)
+PIC/*.c linguist-detectable=true
