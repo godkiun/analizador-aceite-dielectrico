@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analizador Dieléctrico CFE - Monitoreo IA</title>
+    <!-- Cargamos tipografía moderna Inter desde Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --success: #10b981;  /* Verde para Óptimo */
+            --warning: #f59e0b;  /* Amarillo/Naranja para Degradado */
+            --danger: #ef4444;   /* Rojo para Falla - Carbonizado */
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(30, 58, 138, 0.3) 0, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(17, 24, 39, 0.5) 0, transparent 50%);
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 30px;
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 20px;
+        }
+
+        h2 {
+            margin: 0;
+            font-size: 1.6rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .btn-nav {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border-radius: 10px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-nav:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3);
+        }
+
+        .diagnostico-card {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border-color);
+            padding: 24px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+            text-align: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .diagnostico-title {
+            margin: 0 0 10px 0;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .diagnostico-valor {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--primary);
+            transition: color 0.3s ease;
+        }
+
+        .chart-wrapper {
+            background: rgba(15, 23, 42, 0.4);
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            border-radius: 16px;
+            height: 400px;
+        }
+
+        canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h2>Monitoreo Optoelectrónico y Diagnóstico Autónomo</h2>
+            <a href="/laboratorio" class="btn-nav" id="btn-laboratorio">
+                Modo Laboratorio (Recolección) &rarr;
+            </a>
+        </header>
+        
+        <div class="diagnostico-card">
+            <h3 class="diagnostico-title">Diagnóstico de la IA en tiempo real</h3>
+            <div id="ia-prediccion" class="diagnostico-valor">
+                Esperando datos...
+            </div>
+        </div>
+
+        <div class="chart-wrapper">
+            <canvas id="graficaAceite"></canvas>
+        </div>
+    </div>
+
+    <script>
+        // Configuración de la gráfica de Chart.js
+        const ctx = document.getElementById('graficaAceite').getContext('2d');
+        
+        // Estilos y gradiente para la gráfica
+        const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+        gradient.addColorStop(0, 'rgba(59, 130, 246, 0.3)');
+        gradient.addColorStop(1, 'rgba(59, 130, 246, 0.0)');
+
+        const grafica = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [], 
+                datasets: [{
+                    label: 'Transmitancia (V)',
+                    borderColor: '#3b82f6',
+                    backgroundColor: gradient,
+                    fill: true,
+                    data: [], 
+                    borderWidth: 3,
+                    tension: 0.4,
+                    pointRadius: 4,
+                    pointBackgroundColor: '#3b82f6',
+                    pointBorderColor: '#0f172a',
+                    pointBorderWidth: 2
+                }]
+            },
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: '#94a3b8',
+                            font: { family: "'Inter', sans-serif", size: 12 }
+                        }
+                    }
+                },
+                scales: { 
+                    y: { 
+                        beginAtZero: true, 
+                        max: 5,
+                        grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                        ticks: { color: '#94a3b8', font: { family: "'Inter', sans-serif" } }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: '#94a3b8', font: { family: "'Inter', sans-serif" } }
+                    }
+                } 
+            }
+        });
+
+        // Petición al Backend para dibujar la gráfica
+        async function actualizarDatos() {
+            try {
+                const respuesta = await fetch('/api/datos_recientes');
+                const datos = await respuesta.json();
+                
+                grafica.data.labels = [];
+                grafica.data.datasets[0].data = [];
+
+                // Llenar con los datos recibidos (invirtiéndolos para conservar la secuencia temporal)
+                datos.reverse().forEach(registro => {
+                    grafica.data.labels.push(registro.timestamp.split(' ')[1]); // Solo mostramos la hora
+                    grafica.data.datasets[0].data.push(registro.voltaje);
+                });
+                grafica.update();
+            } catch (error) {
+                console.error("Error obteniendo los datos:", error);
+            }
+        }
+
+        // Función para consultar a la IA en tiempo real
+        async function consultarIA() {
+            try {
+                const respuesta = await fetch('/api/estado_ia');
+                const datos = await respuesta.json();
+                
+                const displayIA = document.getElementById('ia-prediccion');
+                
+                if (datos.status === "error") {
+                    displayIA.innerText = datos.message;
+                    displayIA.style.color = "#ef4444"; // Color de error
+                    return;
+                }
+                
+                displayIA.innerText = datos.prediccion + " (" + datos.voltaje + " V)";
+
+                // Cambiar colores según el diagnóstico
+                if (datos.prediccion.includes("Optimo")) {
+                    displayIA.style.color = "#10b981"; // Verde (Óptimo)
+                } else if (datos.prediccion.includes("Degradado")) {
+                    displayIA.style.color = "#f59e0b"; // Amarillo (Degradado)
+                } else {
+                    displayIA.style.color = "#ef4444"; // Rojo (Falla - Carbonizado)
+                }
+            } catch (error) {
+                console.error("Error consultando a la IA:", error);
+            }
+        }
+
+        // Ejecutar las actualizaciones periódicamente
+        setInterval(actualizarDatos, 2000); // Actualiza la gráfica cada 2 segundos
+        setInterval(consultarIA, 1000);     // Consulta a la IA cada 1 segundo
+    </script>
+</body>
+</html>

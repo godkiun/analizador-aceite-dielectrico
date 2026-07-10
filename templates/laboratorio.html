@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analizador Dieléctrico CFE - Panel Laboratorio</title>
+    <!-- Cargamos tipografía moderna Inter desde Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            
+            /* Colores para las etiquetas de los botones */
+            --optimo: #10b981;      /* Verde */
+            --degradado: #f59e0b;   /* Amarillo/Naranja */
+            --falla: #ef4444;       /* Rojo */
+            --sin-etiqueta: #64748b; /* Gris */
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-image: 
+                radial-gradient(at 100% 0%, rgba(30, 58, 138, 0.3) 0, transparent 50%),
+                radial-gradient(at 0% 100%, rgba(17, 24, 39, 0.5) 0, transparent 50%);
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 30px;
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 20px;
+        }
+
+        h2 {
+            margin: 0;
+            font-size: 1.6rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .btn-nav {
+            background-color: #334155;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border-radius: 10px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-nav:hover {
+            background-color: #475569;
+            transform: translateY(-2px);
+        }
+
+        .seccion-laboratorio {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .seccion-laboratorio {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card-control {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border-color);
+            padding: 24px;
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .label-indicador {
+            text-align: center;
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid var(--border-color);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+        }
+
+        .label-indicador-titulo {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin: 0 0 5px 0;
+            font-weight: 600;
+        }
+
+        .label-indicador-valor {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--primary);
+            transition: all 0.3s ease;
+        }
+
+        .grupo-botones {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .btn-label {
+            padding: 14px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .btn-label:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+        }
+
+        .btn-label:active {
+            transform: translateY(0);
+        }
+
+        .btn-optimo { background-color: var(--optimo); }
+        .btn-degradado { background-color: var(--degradado); }
+        .btn-falla { background-color: var(--falla); }
+        .btn-sin { background-color: var(--sin-etiqueta); }
+
+        .btn-activo {
+            outline: 3px solid white;
+            outline-offset: -3px;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+        }
+
+        .card-historial {
+            background: rgba(15, 23, 42, 0.4);
+            border: 1px solid var(--border-color);
+            padding: 24px;
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            max-height: 400px;
+        }
+
+        .card-historial-titulo {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 0 0 15px 0;
+            color: var(--text-main);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        .tabla-datos-wrapper {
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.85rem;
+        }
+
+        th {
+            color: var(--text-muted);
+            font-weight: 600;
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            color: var(--text-main);
+        }
+
+        tr:hover td {
+            background-color: rgba(255, 255, 255, 0.02);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .badge-optimo { background-color: var(--optimo); }
+        .badge-degradado { background-color: var(--degradado); }
+        .badge-falla { background-color: var(--falla); }
+        .badge-sin { background-color: var(--sin-etiqueta); }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h2>Panel de Recolección y Etiquetado Manual</h2>
+            <a href="/" class="btn-nav">
+                &larr; Volver a Gráfica (Monitoreo IA)
+            </a>
+        </header>
+
+        <div class="seccion-laboratorio">
+            <!-- Columna Izquierda: Controles de Etiquetado -->
+            <div class="card-control">
+                <div class="label-indicador">
+                    <p class="label-indicador-titulo">Etiqueta Activa para Recolección</p>
+                    <div id="etiqueta-activa" class="label-indicador-valor">
+                        Sin Etiqueta
+                    </div>
+                </div>
+
+                <div class="grupo-botones">
+                    <button class="btn-label btn-optimo" onclick="setEtiqueta('Aceite Optimo', this)">
+                        Aceite Optimo
+                    </button>
+                    <button class="btn-label btn-degradado" onclick="setEtiqueta('Aceite Degradado', this)">
+                        Aceite Degradado
+                    </button>
+                    <button class="btn-label btn-falla" onclick="setEtiqueta('Falla - Carbonizado', this)">
+                        Falla - Carbonizado
+                    </button>
+                    <button class="btn-label btn-sin" onclick="setEtiqueta('Sin Etiqueta', this)">
+                        Sin Etiqueta
+                    </button>
+                </div>
+            </div>
+
+            <!-- Columna Derecha: Historial de Datos Recientes -->
+            <div class="card-historial">
+                <h3 class="card-historial-titulo">Historial de Recolección (Últimos 20 registros)</h3>
+                <div class="tabla-datos-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Voltaje</th>
+                                <th>Etiqueta</th>
+                                <th>Hora</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-cuerpo">
+                            <tr>
+                                <td colspan="4" style="text-align: center; color: var(--text-muted);">Esperando datos seriales...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Función para cambiar la etiqueta activa en el backend
+        async function setEtiqueta(etiqueta, botonElement) {
+            try {
+                const respuesta = await fetch('/api/set_etiqueta', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ etiqueta: etiqueta }),
+                });
+                
+                const datos = await respuesta.json();
+                
+                if (datos.status === 'success') {
+                    // Actualizar el texto indicador principal
+                    const display = document.getElementById('etiqueta-activa');
+                    display.innerText = datos.estado_actual;
+                    
+                    // Cambiar color del indicador según la etiqueta
+                    if (datos.estado_actual.includes('Optimo')) {
+                        display.style.color = 'var(--optimo)';
+                    } else if (datos.estado_actual.includes('Degradado')) {
+                        display.style.color = 'var(--degradado)';
+                    } else if (datos.estado_actual.includes('Falla')) {
+                        display.style.color = 'var(--falla)';
+                    } else {
+                        display.style.color = 'var(--sin-etiqueta)';
+                    }
+                    
+                    // Remover clase activa de todos los botones y agregarla al presionado
+                    document.querySelectorAll('.btn-label').forEach(btn => {
+                        btn.classList.remove('btn-activo');
+                    });
+                    if (botonElement) {
+                        botonElement.classList.add('btn-activo');
+                    }
+                }
+            } catch (error) {
+                console.error("Error al actualizar la etiqueta:", error);
+            }
+        }
+
+        // Obtener datos recientes de la base de datos para la tabla
+        async function actualizarTabla() {
+            try {
+                const respuesta = await fetch('/api/datos_recientes');
+                const datos = await respuesta.json();
+                
+                const cuerpo = document.getElementById('tabla-cuerpo');
+                
+                if (datos.length === 0) {
+                    cuerpo.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Sin lecturas en la base de datos</td></tr>`;
+                    return;
+                }
+                
+                // Limpiar tabla e insertar registros en orden inverso (más recientes arriba)
+                cuerpo.innerHTML = '';
+                datos.forEach(reg => {
+                    let badgeClass = 'badge-sin';
+                    if (reg.etiqueta.includes('Optimo')) {
+                        badgeClass = 'badge-optimo';
+                    } else if (reg.etiqueta.includes('Degradado')) {
+                        badgeClass = 'badge-degradado';
+                    } else if (reg.etiqueta.includes('Falla')) {
+                        badgeClass = 'badge-falla';
+                    }
+                    
+                    const hora = reg.timestamp.split(' ')[1] || reg.timestamp;
+                    
+                    const fila = document.createElement('tr');
+                    fila.innerHTML = `
+                        <td>${reg.id}</td>
+                        <td style="font-weight: 600;">${reg.voltaje.toFixed(2)} V</td>
+                        <td><span class="badge ${badgeClass}">${reg.etiqueta}</span></td>
+                        <td style="color: var(--text-muted);">${hora}</td>
+                    `;
+                    cuerpo.appendChild(fila);
+                });
+            } catch (error) {
+                console.error("Error actualizando la tabla:", error);
+            }
+        }
+
+        // Obtener el estado inicial de la etiqueta seleccionada al cargar la página
+        async function inicializarEstado() {
+            try {
+                // Hacemos una petición vacía al set_etiqueta o simplemente usamos los datos recientes
+                // para inferir cuál es el estado actual de la etiqueta en el backend
+                const respuesta = await fetch('/api/datos_recientes');
+                const datos = await respuesta.json();
+                
+                // Sincronizamos la clase activa buscando los textos correspondientes
+                // de forma segura desde el backend enviando una consulta.
+                // Como set_etiqueta POST sin cuerpo retorna el actual o error,
+                // podemos simplemente llamar a set_etiqueta con la etiqueta actual para no alterar.
+                // O mejor aún, leemos la última etiqueta guardada si existiese.
+            } catch (e) {}
+            
+            // Cargar la tabla de inmediato
+            actualizarTabla();
+        }
+
+        // Ejecutar actualizaciones periódicamente
+        setInterval(actualizarTabla, 2000); // Actualiza la tabla cada 2 segundos
+        inicializarEstado();
+    </script>
+</body>
+</html>
