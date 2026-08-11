@@ -1,25 +1,9 @@
-# Analizador Optoelectrónico de Aceite Dieléctrico de Bajo Costo ⚡🔬
+# Analizador Dieléctrico Optoelectrónico
 
-Sistema embebido de diagnóstico optoelectrónico impulsado por Machine Learning para evaluar el nivel de degradación en aceites dieléctricos de transformadores de potencia.
+Sistema de diagnóstico no destructivo para la evaluación de la degradación dieléctrica en aceites de transformadores de potencia mediante espectrometría óptica y Machine Learning.
 
----
+## Principio de funcionamiento
 
-## 🔬 Descripción
-El sistema utiliza sensores optoelectrónicos para medir la absorbancia y transmitancia óptica en muestras de aceite dieléctrico. Un modelo de **Machine Learning** clasifica el estado de degradación del aceite en tiempo real.
-
-### 🌟 Componentes:
-* **Hardware & Simulación:** Proyecto de Proteus VSM (`.pdsprj`) y código C para microcontrolador PIC (`PIC/`).
-* **Machine Learning:** Modelo supervisado (`modelo_aceite.pkl`, `entrenar_modelo.py`).
-* **Base de Datos:** Almacenamiento SQLite (`lecturas_aceite.db`).
-* **Dashboard Web:** Interfaz web interactiva (`app.py`).
-
----
-
-## 🚀 Ejecución
-
-```bash
-git clone https://github.com/godkiun/analizador-aceite-dielectrico.git
-cd analizador-aceite-dielectrico
-pip install -r requirements.txt
-python app.py
-```
+- **Sensor Óptico:** Emisión de luz a longitudes de onda específicas para medir la absorbancia y transmitancia del aceite.
+- **Procesamiento de Señal:** Filtrado de ruido y acondicionamiento analógico mediante amplificadores operacionales de precisión.
+- **Clasificación por IA:** Modelo entrenado en Scikit-Learn que clasifica el estado del dieléctrico (Normal, Humedad Alta, Oxidado, Contaminado) enviando alertas de mantenimiento predictivo a la API Flask.
